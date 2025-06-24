@@ -10,10 +10,10 @@ pub(crate) enum EditorKind {
     Nano,
     Pico,
     Helix,
+    Kakoune,
     // GUI
     Code,
     Atom,
-    Subl,
     Gvim,
     Mate,
     #[default]
@@ -32,9 +32,8 @@ impl From<String> for EditorKind {
             "nano" => EditorKind::Nano,
             "pico" => EditorKind::Pico,
             "hx" => EditorKind::Helix,
+            "kak" => EditorKind::Kakoune,
             "code" | "vscode" => EditorKind::Code,
-            "atom" => EditorKind::Atom,
-            "sublime" | "subl" => EditorKind::Subl,
             "gvim" => EditorKind::Gvim,
             "mate" => EditorKind::Mate,
             _ => EditorKind::UnknownEditor,
@@ -57,8 +56,11 @@ impl EditorKind {
             EditorKind::Nano | EditorKind::Pico => {
                 vec![format!("+{},{}", line, column), path]
             }
-            EditorKind::Helix | EditorKind::Subl => {
+            EditorKind::Helix => {
                 vec![format!("{}:{}:{}", path, line, column)]
+            }
+            EditorKind::Kakoune => {
+                vec![format!("{}", path), format!("+{}:{}", line, column)]
             }
             EditorKind::Code | EditorKind::Atom => {
                 vec![

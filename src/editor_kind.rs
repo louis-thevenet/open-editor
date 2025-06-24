@@ -21,6 +21,7 @@ pub(crate) enum EditorKind {
 }
 
 impl From<String> for EditorKind {
+    /// Convert a string to an [`EditorKind`].
     fn from(value: String) -> Self {
         println!("Getting editor from: {value}");
         match value.as_str() {
@@ -40,6 +41,7 @@ impl From<String> for EditorKind {
         }
     }
 }
+/// Get Editor specific arguments for opening a file at a specific line and column.
 impl EditorKind {
     pub(crate) fn get_editor_args(
         &self,
@@ -55,19 +57,14 @@ impl EditorKind {
             EditorKind::Nano | EditorKind::Pico => {
                 vec![format!("+{},{}", line, column), path]
             }
-            EditorKind::Helix => {
+            EditorKind::Helix | EditorKind::Subl => {
                 vec![format!("{}:{}:{}", path, line, column)]
             }
-
             EditorKind::Code | EditorKind::Atom => {
                 vec![
                     "--goto".to_string(),
                     format!("{}:{}:{}", path, line, column),
                 ]
-            }
-            EditorKind::Subl => {
-                // Sublime supports file:line:col suffix :contentReference[oaicite:1]{index=1}
-                vec![format!("{}:{}:{}", path, line, column)]
             }
             EditorKind::Gvim | EditorKind::Vi | EditorKind::Vim | EditorKind::Nvim => {
                 vec![format!("+call cursor({}, {})", line, column), path]

@@ -1,6 +1,7 @@
 use std::{fmt::Display, path::PathBuf};
 
 #[derive(Debug)]
+/// Errors that can occur when trying to open an editor.
 pub enum OpenEditorError {
     NoEditorFound,
     EditorCallError {

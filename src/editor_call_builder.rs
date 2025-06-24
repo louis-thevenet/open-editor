@@ -18,6 +18,8 @@ pub struct EditorCallBuilder {
 
 impl EditorCallBuilder {
     /// Creates a new [`EditorCallBuilder`] with the given file path.
+    /// You can optionally set the line and column numbers later using the `at_line` and `at_column` methods.
+    /// Finally, you can call the `call_editor` method to open the editor.
     ///
     /// # Errors
     /// This function will return an error if the default editor cannot be found in the environment variables.
@@ -30,6 +32,7 @@ impl EditorCallBuilder {
         })
     }
     #[must_use]
+    /// Sets the line number for the editor to open at.
     pub fn at_line(self, line: usize) -> Self {
         Self {
             line_number: line,
@@ -37,16 +40,17 @@ impl EditorCallBuilder {
         }
     }
     #[must_use]
+    /// Sets the column number for the editor to open at.
     pub fn at_column(self, line: usize) -> Self {
         Self {
             column_number: line,
             ..self
         }
     }
-    ///
+    /// Calls the editor with options from the [`EditorCallBuilder`].
     /// # Errors
     ///
-    /// This function will return an error if .
+    /// This function will return an error if the commands fails to execute or if the editor returns a non-zero exit code.
     pub fn call_editor(&self) -> Result<(), OpenEditorError> {
         self.editor.validate_executable()?;
         let status = Command::new(&self.editor.binary_path)
@@ -76,12 +80,14 @@ impl EditorCallBuilder {
         }
     }
 }
+/// Gets the full path of the editor binary based on the provided editor name.
 fn get_full_path(editor_name: OsString) -> PathBuf {
     match which::which(editor_name.clone()) {
         Ok(path) => path,
         Err(_) => PathBuf::from(editor_name), // Fallback to just the name but that's weird
     }
 }
+/// Gets the default editor from the environment variables `VISUAL` or `EDITOR`.
 fn get_default_editor() -> Result<Editor, OpenEditorError> {
     ENV_VARS
         .iter()

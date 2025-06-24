@@ -18,6 +18,8 @@ pub enum OpenEditorError {
         binary_path: PathBuf,
         error: Option<std::io::Error>,
     },
+    FileReadFail(std::io::Error),
+    TempFileCleanupFail(String),
 }
 impl Display for OpenEditorError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -43,6 +45,12 @@ impl Display for OpenEditorError {
                 "Editor binary is not executable at path: {}",
                 binary_path.display()
             ),
+            OpenEditorError::FileReadFail(error) => {
+                write!(f, "Failed to read file: {error}")
+            }
+            OpenEditorError::TempFileCleanupFail(filename) => {
+                write!(f, "Failed to clean up temporary file: {filename}")
+            }
         }
     }
 }
@@ -53,7 +61,9 @@ impl std::error::Error for OpenEditorError {
                 exit_code: _,
                 stderr: _,
             } => todo!(),
-            OpenEditorError::CommandFail { error } => Some(error),
+            OpenEditorError::CommandFail { error } | OpenEditorError::FileReadFail(error) => {
+                Some(error)
+            }
             OpenEditorError::EditorNotFound { binary_path: _ } | OpenEditorError::NoEditorFound => {
                 None
             }
@@ -61,6 +71,7 @@ impl std::error::Error for OpenEditorError {
                 binary_path: _,
                 error,
             } => error.as_ref().map(|e| e as &dyn std::error::Error),
+            OpenEditorError::TempFileCleanupFail(_) => None,
         }
     }
 }

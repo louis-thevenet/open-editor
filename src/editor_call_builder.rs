@@ -25,7 +25,7 @@ impl EditorCallBuilder {
     /// This function will return an error if the default editor cannot be found in the environment variables.
     pub fn new<P: AsRef<Path>>(file_path: P) -> Result<Self, OpenEditorError> {
         Ok(Self {
-            editor: get_default_editor()?,
+            editor: Self::get_default_editor()?,
             file_path: file_path.as_ref().to_path_buf(),
             line_number: 1,
             column_number: 1,
@@ -79,26 +79,26 @@ impl EditorCallBuilder {
             Err(e) => Err(OpenEditorError::CommandFail { error: e }),
         }
     }
-}
-/// Gets the full path of the editor binary based on the provided editor name.
-fn get_full_path(editor_name: OsString) -> PathBuf {
-    match which::which(editor_name.clone()) {
-        Ok(path) => path,
-        Err(_) => PathBuf::from(editor_name), // Fallback to just the name but that's weird
+    /// Gets the full path of the editor binary based on the provided editor name.
+    fn get_full_path(editor_name: OsString) -> PathBuf {
+        match which::which(editor_name.clone()) {
+            Ok(path) => path,
+            Err(_) => PathBuf::from(editor_name), // Fallback to just the name but that's weird
+        }
     }
-}
-/// Gets the default editor from the environment variables `VISUAL` or `EDITOR`.
-fn get_default_editor() -> Result<Editor, OpenEditorError> {
-    ENV_VARS
-        .iter()
-        .filter_map(env::var_os)
-        .filter(|var| !var.is_empty())
-        .map(|v| {
-            let path = get_full_path(v.clone());
-            (v.into_string().ok(), path)
-        })
-        .filter_map(|(v, path)| v.map(|v| (v, path)))
-        .map(|(v, cmd)| (Editor::new(EditorKind::from(v), cmd)))
-        .next()
-        .ok_or(OpenEditorError::NoEditorFound)
+    /// Gets the default editor from the environment variables `VISUAL` or `EDITOR`.
+    fn get_default_editor() -> Result<Editor, OpenEditorError> {
+        ENV_VARS
+            .iter()
+            .filter_map(env::var_os)
+            .filter(|var| !var.is_empty())
+            .map(|v| {
+                let path = EditorCallBuilder::get_full_path(v.clone());
+                (v.into_string().ok(), path)
+            })
+            .filter_map(|(v, path)| v.map(|v| (v, path)))
+            .map(|(v, cmd)| (Editor::new(EditorKind::from(v), cmd)))
+            .next()
+            .ok_or(OpenEditorError::NoEditorFound)
+    }
 }

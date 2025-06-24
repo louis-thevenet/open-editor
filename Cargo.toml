@@ -2,6 +2,11 @@
 name = "open-editor"
 version = "0.1.0"
 edition = "2024"
+repository = "https://github.com/louis-thevenet/open-editor"
+authors = ["Louis Thevenet <louis.tvnt@gmail.com>"]
+license = "MIT"
+description = "Open files or Strings in user's default editor"
 
 [dependencies]
 which = "8.0.0"
+

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::{EditorKind, errors::OpenEditorError};
+use crate::{editor_kind::EditorKind, errors::OpenEditorError};
 
 #[derive(Debug)]
 pub(crate) struct Editor {

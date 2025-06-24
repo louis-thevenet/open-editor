@@ -1,4 +1,4 @@
-use open_editor::{EditorCallBuilder, errors::OpenEditorError};
+use open_editor::{editor_call_builder::EditorCallBuilder, errors::OpenEditorError};
 
 fn main() -> Result<(), OpenEditorError> {
     let filename = String::from("/tmp/new_file.txt");

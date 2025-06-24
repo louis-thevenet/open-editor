@@ -21,7 +21,6 @@ pub(crate) enum EditorKind {
 impl From<String> for EditorKind {
     /// Convert a string to an [`EditorKind`].
     fn from(value: String) -> Self {
-        println!("Getting editor from: {value}");
         match value.as_str() {
             "vi" => EditorKind::Vi,
             "vim" => EditorKind::Vim,

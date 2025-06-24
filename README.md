@@ -31,3 +31,10 @@ use open_editor::open_editor;
 let content = open_editor()?;
 assert!(!content.is_empty(), "Editor returned empty content");
 ```
+
+### Editing Strings
+
+```rust
+let template = "Hello, {name}!\nWelcome to {place}.";
+let filled_template = edit_in_editor(template)?;
+```

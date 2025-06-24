@@ -13,9 +13,7 @@ pub(crate) enum EditorKind {
     Kakoune,
     // GUI
     Code,
-    Atom,
     Gvim,
-    Mate,
     #[default]
     UnknownEditor,
 }
@@ -35,7 +33,6 @@ impl From<String> for EditorKind {
             "kak" => EditorKind::Kakoune,
             "code" | "vscode" => EditorKind::Code,
             "gvim" => EditorKind::Gvim,
-            "mate" => EditorKind::Mate,
             _ => EditorKind::UnknownEditor,
         }
     }
@@ -62,7 +59,7 @@ impl EditorKind {
             EditorKind::Kakoune => {
                 vec![format!("{}", path), format!("+{}:{}", line, column)]
             }
-            EditorKind::Code | EditorKind::Atom => {
+            EditorKind::Code => {
                 vec![
                     "-w".to_string(),
                     "--goto".to_string(),
@@ -71,9 +68,6 @@ impl EditorKind {
             }
             EditorKind::Gvim | EditorKind::Vi | EditorKind::Vim | EditorKind::Nvim => {
                 vec![format!("+call cursor({}, {})", line, column), path]
-            }
-            EditorKind::Mate => {
-                vec!["--line".to_string(), line.to_string(), path]
             }
             EditorKind::UnknownEditor => vec![path],
         }

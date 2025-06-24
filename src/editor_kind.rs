@@ -64,6 +64,7 @@ impl EditorKind {
             }
             EditorKind::Code | EditorKind::Atom => {
                 vec![
+                    "-w".to_string(),
                     "--goto".to_string(),
                     format!("{}:{}:{}", path, line, column),
                 ]

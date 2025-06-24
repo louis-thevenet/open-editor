@@ -1,3 +1,5 @@
+use std::env::temp_dir;
+
 use crate::{editor_call_builder::EditorCallBuilder, errors::OpenEditorError};
 
 mod editor;
@@ -10,7 +12,9 @@ pub mod errors;
 /// # Errors
 /// This function will return an error if the editor call fails, if the file cannot be read, or if the temporary file cleanup fails.
 pub fn edit_in_editor(string: &str) -> Result<String, OpenEditorError> {
-    let filename = String::from("/tmp/open_editor_tmp_file");
+    let mut filename = temp_dir();
+    filename.push(String::from("open_editor_tmp_file"));
+
     // Write the initial content to the temporary file
     std::fs::write(&filename, string).map_err(OpenEditorError::FileManipulationFail)?;
 
@@ -19,8 +23,9 @@ pub fn edit_in_editor(string: &str) -> Result<String, OpenEditorError> {
         std::fs::read_to_string(&filename).map_err(OpenEditorError::FileManipulationFail)?;
 
     // Clean up the temporary file after reading
-    std::fs::remove_file(&filename)
-        .map_err(|_| OpenEditorError::TempFileCleanupFail(filename.clone()))?;
+    std::fs::remove_file(&filename).map_err(|_| {
+        OpenEditorError::TempFileCleanupFail(filename.to_string_lossy().into_owned())
+    })?;
 
     Ok(result)
 }

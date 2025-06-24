@@ -1,3 +1,5 @@
+[![crates.io](https://img.shields.io/crates/v/open-editor.svg)](https://crates.io/crates/open-editor) [![docs.rs](https://docs.rs/open-editor/badge.svg)](https://docs.rs/open-editor/) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/louis-thevenet/open-editor/ci.yml)
+
 # `open-editor`
 
 ## About

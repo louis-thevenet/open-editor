@@ -12,6 +12,7 @@ static ENV_VARS: &[&str] = &["VISUAL", "EDITOR"];
 pub struct EditorCallBuilder {
     editor: Editor,
     file_path: PathBuf,
+    wait: bool,
     line_number: usize,
     column_number: usize,
 }
@@ -27,6 +28,7 @@ impl EditorCallBuilder {
         Ok(Self {
             editor: Self::get_default_editor()?,
             file_path: file_path.as_ref().to_path_buf(),
+            wait: true,
             line_number: 1,
             column_number: 1,
         })
@@ -47,25 +49,41 @@ impl EditorCallBuilder {
             ..self
         }
     }
+    /// Whether to wait for the editor to close before returning.
+    #[must_use]
+    pub fn wait_for_editor(self, value: bool) -> Self {
+        Self {
+            wait: value,
+            ..self
+        }
+    }
     /// Calls the editor with options from the [`EditorCallBuilder`].
     /// # Errors
     ///
     /// This function will return an error if the commands fails to execute or if the editor returns a non-zero exit code.
     pub fn call_editor(&self) -> Result<(), OpenEditorError> {
         self.editor.validate_executable()?;
-        let status = Command::new(&self.editor.binary_path)
+        let command = Command::new(&self.editor.binary_path)
             .args(self.editor.editor_type.get_editor_args(
                 &self.file_path,
+                self.wait,
                 self.line_number,
                 self.column_number,
             ))
             .stdin(Stdio::inherit())
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
-            .output();
+            .spawn();
 
-        match status {
+        if !self.wait {
+            return Ok(());
+        }
+
+        match command {
             Ok(output) => {
+                let output = output
+                    .wait_with_output()
+                    .map_err(|e| OpenEditorError::CommandFail { error: e })?;
                 if output.status.success() {
                     Ok(())
                 } else {

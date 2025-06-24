@@ -42,6 +42,7 @@ impl EditorKind {
     pub(crate) fn get_editor_args(
         &self,
         file_path: &Path,
+        wait: bool,
         line: usize,
         column: usize,
     ) -> Vec<String> {
@@ -61,7 +62,11 @@ impl EditorKind {
             }
             EditorKind::Code => {
                 vec![
-                    "-w".to_string(),
+                    if wait {
+                        "-w".to_string()
+                    } else {
+                        String::new()
+                    },
                     "--goto".to_string(),
                     format!("{}:{}:{}", path, line, column),
                 ]

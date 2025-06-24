@@ -61,9 +61,8 @@ impl std::error::Error for OpenEditorError {
                 exit_code: _,
                 stderr: _,
             } => todo!(),
-            OpenEditorError::CommandFail { error } | OpenEditorError::FileManipulationFail(error) => {
-                Some(error)
-            }
+            OpenEditorError::CommandFail { error }
+            | OpenEditorError::FileManipulationFail(error) => Some(error),
             OpenEditorError::EditorNotFound { binary_path: _ } | OpenEditorError::NoEditorFound => {
                 None
             }

@@ -52,7 +52,7 @@ impl EditorKind {
         let path = file_path.to_string_lossy().into_owned();
         match self {
             EditorKind::Emacs => {
-                vec!["+".to_string(), format!("{}:{}", line, column), path]
+                vec![format!("+{}:{}", line, column), path]
             }
             EditorKind::Nano | EditorKind::Pico => {
                 vec![format!("+{},{}", line, column), path]

@@ -1,5 +1,13 @@
 use std::path::Path;
-
+#[cfg(target_os = "windows")]
+#[derive(Default, Debug)]
+pub(crate) enum EditorKind {
+    NotePad,
+    Code,
+    #[default]
+    UnknownEditor,
+}
+#[cfg(target_os = "linux")]
 #[derive(Default, Debug)]
 pub(crate) enum EditorKind {
     // CLI
@@ -21,6 +29,7 @@ pub(crate) enum EditorKind {
 impl From<String> for EditorKind {
     /// Convert a string to an [`EditorKind`].
     fn from(value: String) -> Self {
+        #[cfg(target_os = "linux")]
         match value.as_str() {
             "vi" => EditorKind::Vi,
             "vim" => EditorKind::Vim,
@@ -32,6 +41,12 @@ impl From<String> for EditorKind {
             "kak" => EditorKind::Kakoune,
             "code" | "vscode" => EditorKind::Code,
             "gvim" => EditorKind::Gvim,
+            _ => EditorKind::UnknownEditor,
+        }
+        #[cfg(target_os = "windows")]
+        match value.as_str() {
+            "notepad" => EditorKind::NotePad,
+            "code" | "vscode" => EditorKind::Code,
             _ => EditorKind::UnknownEditor,
         }
     }
@@ -46,6 +61,8 @@ impl EditorKind {
         column: usize,
     ) -> Vec<String> {
         let path = file_path.to_string_lossy().into_owned();
+
+        #[cfg(target_os = "linux")]
         match self {
             EditorKind::Emacs => {
                 vec![format!("+{}:{}", line, column), path]
@@ -72,6 +89,23 @@ impl EditorKind {
             }
             EditorKind::Gvim | EditorKind::Vi | EditorKind::Vim | EditorKind::Nvim => {
                 vec![format!("+call cursor({}, {})", line, column), path]
+            }
+            EditorKind::UnknownEditor => vec![path],
+        }
+        #[cfg(target_os = "windows")]
+        match self {
+            EditorKind::NotePad => {
+                vec![path]
+            }
+            EditorKind::Code => {
+                vec![
+                    if wait {
+                        "--wait".to_string()
+                    } else {
+                        String::new()
+                    },
+                    format!("{}:{}:{}", path, line, column),
+                ]
             }
             EditorKind::UnknownEditor => vec![path],
         }

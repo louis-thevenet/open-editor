@@ -7,8 +7,6 @@ use std::{
 
 use crate::{editor::Editor, editor_kind::EditorKind, errors::OpenEditorError};
 
-static ENV_VARS: &[&str] = &["VISUAL", "EDITOR"];
-
 pub struct EditorCallBuilder {
     editor: Editor,
     file_path: PathBuf,
@@ -22,11 +20,22 @@ impl EditorCallBuilder {
     /// You can optionally set the line and column numbers later using the `at_line` and `at_column` methods.
     /// Finally, you can call the `call_editor` method to open the editor.
     ///
+    /// The editor to use is determined by the `VISUAL` and `EDITOR` environment
+    /// variables, in that order.
+    ///
     /// # Errors
     /// This function will return an error if the default editor cannot be found in the environment variables.
     pub fn new<P: AsRef<Path>>(file_path: P) -> Result<Self, OpenEditorError> {
+        Self::new_with_env_vars(file_path, super::ENV_VARS)
+    }
+    /// Similar to [`EditorCallBuilder::new`], but allows specifying the
+    /// environment variables to use to find the editor.
+    pub fn new_with_env_vars<P: AsRef<Path>>(
+        file_path: P,
+        env_vars: &[&str],
+    ) -> Result<Self, OpenEditorError> {
         Ok(Self {
-            editor: Self::get_default_editor()?,
+            editor: Self::get_default_editor(env_vars)?,
             file_path: file_path.as_ref().to_path_buf(),
             wait: true,
             line_number: 1,
@@ -105,8 +114,8 @@ impl EditorCallBuilder {
         }
     }
     /// Gets the default editor from the environment variables `VISUAL` or `EDITOR`.
-    fn get_default_editor() -> Result<Editor, OpenEditorError> {
-        ENV_VARS
+    fn get_default_editor(env_vars: &[&str]) -> Result<Editor, OpenEditorError> {
+        env_vars
             .iter()
             .filter_map(env::var_os)
             .filter(|var| !var.is_empty())

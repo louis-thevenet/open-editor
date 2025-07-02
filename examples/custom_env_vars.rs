@@ -1,7 +1,9 @@
-use open_editor::{errors::OpenEditorError, open_editor_with_env_vars};
+use open_editor::{EditorCallBuilder, errors::OpenEditorError};
 
 fn main() -> Result<(), OpenEditorError> {
-    let user_input = open_editor_with_env_vars(&["MY_EDITOR"])?;
+    let user_input = EditorCallBuilder::new()
+        .with_env_vars(&["MY_EDITOR"])
+        .open_editor()?;
     println!("User input:\n{user_input}");
     Ok(())
 }

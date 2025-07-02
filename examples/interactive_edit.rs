@@ -1,29 +1,29 @@
 use open_editor::editor_call_builder::EditorCallBuilder;
 use std::{
     io::{self, Write},
+    path::PathBuf,
     process::exit,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let (filename, line, column) = get_parameters()?;
+    let (file_path, line, column) = get_parameters()?;
 
-    EditorCallBuilder::new(filename)?
+    EditorCallBuilder::new()
         .at_line(line)
         .at_column(column)
-        .call_editor()?;
-
+        .open_file(&file_path)?;
     Ok(())
 }
 
-fn get_parameters() -> Result<(String, usize, usize), Box<dyn std::error::Error>> {
+fn get_parameters() -> Result<(PathBuf, usize, usize), Box<dyn std::error::Error>> {
     print!("Path to file to open [./Cargo.toml]: ");
     io::stdout().flush()?;
-    let mut filename = String::new();
-    io::stdin().read_line(&mut filename)?;
-    let mut filename = filename.trim();
-    if filename.is_empty() {
-        filename = "./Cargo.toml";
+    let mut file_path = String::new();
+    io::stdin().read_line(&mut file_path)?;
+    if file_path.is_empty() {
+        file_path = "./Cargo.toml".to_string();
     }
+    let file_path = PathBuf::from(file_path.trim());
     print!("Line number: ");
     io::stdout().flush()?;
     let mut line = String::new();
@@ -44,5 +44,5 @@ fn get_parameters() -> Result<(String, usize, usize), Box<dyn std::error::Error>
         eprintln!("Error: Invalid column number");
         exit(-1)
     };
-    Ok((filename.to_owned(), line, column))
+    Ok((file_path, line, column))
 }

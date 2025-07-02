@@ -1,7 +1,7 @@
 use std::path::Path;
 
-#[derive(Default, Debug)]
-pub(crate) enum EditorKind {
+#[derive(Debug)]
+pub enum EditorKind {
     // CLI
     Vi,
     Vim,
@@ -14,14 +14,32 @@ pub(crate) enum EditorKind {
     // GUI
     Code,
     Gvim,
-    #[default]
-    UnknownEditor,
+    UnknownEditor(String),
 }
 
-impl From<String> for EditorKind {
+impl EditorKind {
+    /// Returns the editor name as a string.
+    pub(crate) fn as_str(&self) -> &str {
+        match self {
+            EditorKind::Vi => "vi",
+            EditorKind::Vim => "vim",
+            EditorKind::Nvim => "nvim",
+            EditorKind::Emacs => "emacs",
+            EditorKind::Nano => "nano",
+            EditorKind::Pico => "pico",
+            EditorKind::Helix => "hx",
+            EditorKind::Kakoune => "kak",
+            EditorKind::Code => "code",
+            EditorKind::Gvim => "gvim",
+            EditorKind::UnknownEditor(name) => name.as_str(),
+        }
+    }
+}
+
+impl<T: AsRef<str>> From<T> for EditorKind {
     /// Convert a string to an [`EditorKind`].
-    fn from(value: String) -> Self {
-        match value.as_str() {
+    fn from(value: T) -> Self {
+        match value.as_ref() {
             "vi" => EditorKind::Vi,
             "vim" => EditorKind::Vim,
             "nvim" => EditorKind::Nvim,
@@ -32,7 +50,7 @@ impl From<String> for EditorKind {
             "kak" => EditorKind::Kakoune,
             "code" | "vscode" => EditorKind::Code,
             "gvim" => EditorKind::Gvim,
-            _ => EditorKind::UnknownEditor,
+            v => EditorKind::UnknownEditor(v.to_owned()),
         }
     }
 }
@@ -73,7 +91,7 @@ impl EditorKind {
             EditorKind::Gvim | EditorKind::Vi | EditorKind::Vim | EditorKind::Nvim => {
                 vec![format!("+call cursor({}, {})", line, column), path]
             }
-            EditorKind::UnknownEditor => vec![path],
+            EditorKind::UnknownEditor(_) => vec![path],
         }
     }
 }

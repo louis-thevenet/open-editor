@@ -1,4 +1,4 @@
-use open_editor::editor_call_builder::EditorCallBuilder;
+use open_editor::EditorCallBuilder;
 use std::{
     io::{self, Write},
     process::exit,

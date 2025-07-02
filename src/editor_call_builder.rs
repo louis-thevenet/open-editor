@@ -1,6 +1,5 @@
 use std::{
     env,
-    ffi::OsString,
     path::{Path, PathBuf},
     process::{Command, Stdio},
 };
@@ -28,11 +27,12 @@ impl EditorCallBuilder {
     pub fn new<P: AsRef<Path>>(file_path: P) -> Result<Self, OpenEditorError> {
         Self::new_with_env_vars(file_path, super::ENV_VARS)
     }
+
     /// Similar to [`EditorCallBuilder::new`], but allows specifying the
     /// environment variables to use to find the editor.
-    pub fn new_with_env_vars<P: AsRef<Path>>(
+    pub fn new_with_env_vars<P: AsRef<Path>, V: AsRef<str>>(
         file_path: P,
-        env_vars: &[&str],
+        env_vars: &[V],
     ) -> Result<Self, OpenEditorError> {
         Ok(Self {
             editor: Self::get_default_editor(env_vars)?,
@@ -42,6 +42,22 @@ impl EditorCallBuilder {
             column_number: 1,
         })
     }
+
+    /// Similar to [`EditorCallBuilder::new`], but allows specifying the
+    /// [`Editor``] used to open the file.
+    pub fn new_with_editor<P: AsRef<Path>>(
+        file_path: P,
+        editor: Editor,
+    ) -> Result<Self, OpenEditorError> {
+        Ok(Self {
+            editor,
+            file_path: file_path.as_ref().to_path_buf(),
+            wait: true,
+            line_number: 1,
+            column_number: 1,
+        })
+    }
+
     #[must_use]
     /// Sets the line number for the editor to open at.
     pub fn at_line(self, line: usize) -> Self {
@@ -106,25 +122,13 @@ impl EditorCallBuilder {
             Err(e) => Err(OpenEditorError::CommandFail { error: e }),
         }
     }
-    /// Gets the full path of the editor binary based on the provided editor name.
-    fn get_full_path(editor_name: OsString) -> PathBuf {
-        match which::which(editor_name.clone()) {
-            Ok(path) => path,
-            Err(_) => PathBuf::from(editor_name), // Fallback to just the name but that's weird
-        }
-    }
     /// Gets the default editor from the environment variables `VISUAL` or `EDITOR`.
-    fn get_default_editor(env_vars: &[&str]) -> Result<Editor, OpenEditorError> {
+    fn get_default_editor<V: AsRef<str>>(env_vars: &[V]) -> Result<Editor, OpenEditorError> {
         env_vars
             .iter()
-            .filter_map(env::var_os)
+            .filter_map(|v| env::var(v.as_ref()).ok())
             .filter(|var| !var.is_empty())
-            .map(|v| {
-                let path = EditorCallBuilder::get_full_path(v.clone());
-                (v.into_string().ok(), path)
-            })
-            .filter_map(|(v, path)| v.map(|v| (v, path)))
-            .map(|(v, cmd)| (Editor::new(EditorKind::from(v), cmd)))
+            .map(|v| Editor::from(EditorKind::from(v)))
             .next()
             .ok_or(OpenEditorError::NoEditorFound)
     }

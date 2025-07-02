@@ -3,13 +3,31 @@ use std::env::temp_dir;
 use crate::errors::OpenEditorError;
 
 mod editor;
-pub mod editor_call_builder;
+mod editor_call_builder;
 mod editor_kind;
 pub mod errors;
 
-pub use editor_call_builder::EditorCallBuilder;
+pub use {editor::Editor, editor_call_builder::EditorCallBuilder, editor_kind::EditorKind};
 
 static ENV_VARS: &[&str] = &["VISUAL", "EDITOR"];
+
+pub struct EditOptions {
+    /// Editor to use.
+    pub editor: Option<editor::Editor>,
+
+    /// Environment variables to use to find the editor, if `editor` is not
+    /// specified.
+    pub env_vars: Vec<String>,
+}
+
+impl Default for EditOptions {
+    fn default() -> Self {
+        Self {
+            editor: None,
+            env_vars: ENV_VARS.iter().map(|v| v.to_string()).collect(),
+        }
+    }
+}
 
 /// Open the default editor and allows editing of a string.
 ///
@@ -17,16 +35,17 @@ static ENV_VARS: &[&str] = &["VISUAL", "EDITOR"];
 /// variables, in that order.
 ///
 /// # Errors
-/// This function will return an error if the editor call fails, if the file cannot be read, or if the temporary file cleanup fails.
+///
+/// This function will return an error if the editor call fails, if the file
+/// cannot be read, or if the temporary file cleanup fails.
 pub fn edit_in_editor(string: &str) -> Result<String, OpenEditorError> {
-    edit_in_editor_with_env_vars(string, ENV_VARS)
+    edit_in_editor_with_opts(string, EditOptions::default())
 }
 
-/// Similar to [`edit_in_editor`], but allows specifying the environment
-/// variables to use to find the editor.
-pub fn edit_in_editor_with_env_vars(
+/// Similar to [`edit_in_editor`], but allows specifying [`EditOptions`].
+pub fn edit_in_editor_with_opts(
     string: &str,
-    env_vars: &[&str],
+    opts: EditOptions,
 ) -> Result<String, OpenEditorError> {
     let mut filename = temp_dir();
     filename.push(String::from("open_editor_tmp_file"));
@@ -34,7 +53,12 @@ pub fn edit_in_editor_with_env_vars(
     // Write the initial content to the temporary file
     std::fs::write(&filename, string).map_err(OpenEditorError::FileManipulationFail)?;
 
-    EditorCallBuilder::new_with_env_vars(filename.clone(), env_vars)?.call_editor()?;
+    let builder = match opts.editor {
+        Some(editor) => EditorCallBuilder::new_with_editor(filename.clone(), editor)?,
+        None => EditorCallBuilder::new_with_env_vars(filename.clone(), &opts.env_vars)?,
+    };
+
+    builder.call_editor()?;
     let result =
         std::fs::read_to_string(&filename).map_err(OpenEditorError::FileManipulationFail)?;
 
@@ -53,18 +77,18 @@ pub fn edit_in_editor_with_env_vars(
 ///
 /// # Errors
 ///
-/// This function will return an error if the editor call fails, if the file cannot be read, or if the temporary file cleanup fails.
+/// This function will return an error if the editor call fails, if the file
+/// cannot be read, or if the temporary file cleanup fails.
 pub fn edit_mut_in_editor(string: &mut String) -> Result<(), OpenEditorError> {
-    edit_mut_in_editor_with_env_vars(string, ENV_VARS)
+    edit_mut_in_editor_with_opts(string, EditOptions::default())
 }
 
-/// Similar to [`edit_mut_in_editor`], but allows specifying the environment
-/// variables to use to find the editor.
-pub fn edit_mut_in_editor_with_env_vars(
+/// Similar to [`edit_mut_in_editor`], but allows specifying [`EditOptions`].
+pub fn edit_mut_in_editor_with_opts(
     string: &mut String,
-    env_vars: &[&str],
+    opts: EditOptions,
 ) -> Result<(), OpenEditorError> {
-    *string = edit_in_editor_with_env_vars(string, env_vars)?;
+    *string = edit_in_editor_with_opts(string, opts)?;
     Ok(())
 }
 
@@ -74,13 +98,14 @@ pub fn edit_mut_in_editor_with_env_vars(
 /// variables, in that order.
 ///
 /// # Errors
-/// If the editor call fails, or if the file cannot be read, an error will be returned.
+///
+/// If the editor call fails, or if the file cannot be read, an error will be
+/// returned.
 pub fn open_editor() -> Result<String, OpenEditorError> {
-    open_editor_with_env_vars(ENV_VARS)
+    open_editor_with_opts(EditOptions::default())
 }
 
-/// Similar to [`open_editor`], but allows specifying the environment variables
-/// to use to find the editor.
-pub fn open_editor_with_env_vars(env_vars: &[&str]) -> Result<String, OpenEditorError> {
-    edit_in_editor_with_env_vars("", env_vars)
+/// Similar to [`open_editor`], but allows specifying [`EditOptions`].
+pub fn open_editor_with_opts(opts: EditOptions) -> Result<String, OpenEditorError> {
+    edit_in_editor_with_opts("", opts)
 }

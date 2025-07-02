@@ -1,22 +1,24 @@
-use std::path::PathBuf;
+use std::{ffi::OsStr, path::PathBuf};
 
 use crate::{editor_kind::EditorKind, errors::OpenEditorError};
 
 #[derive(Debug)]
 /// Represents an editor instance with its type and binary path.
-pub(crate) struct Editor {
+pub struct Editor {
     pub(crate) editor_type: EditorKind,
     pub(crate) binary_path: PathBuf,
 }
 
 impl Editor {
-    /// Creates a new `Editor` instance with the specified editor type and binary path.
-    pub(crate) fn new(editor_type: EditorKind, binary_path: PathBuf) -> Self {
+    /// Creates a new `Editor` instance with the specified [`EditorKind`] and
+    /// binary path.
+    pub fn new(editor_type: EditorKind, binary_path: PathBuf) -> Self {
         Self {
             editor_type,
             binary_path,
         }
     }
+
     /// Validates that the binary path exists and is executable.
     /// Returns `Ok(())` if the binary is valid, or an `OpenEditorError` if it is not.
     pub(crate) fn validate_executable(&self) -> Result<(), OpenEditorError> {
@@ -44,5 +46,28 @@ impl Editor {
         }
 
         Ok(())
+    }
+}
+
+impl<T: Into<EditorKind>> From<T> for Editor {
+    fn from(editor_type: T) -> Self {
+        let editor_type = editor_type.into();
+        let binary_path = match &editor_type {
+            EditorKind::UnknownEditor(name) => get_full_path(name),
+            v => get_full_path(v.as_str()),
+        };
+
+        Self {
+            editor_type,
+            binary_path,
+        }
+    }
+}
+
+/// Gets the full path of the editor binary based on the provided editor name.
+fn get_full_path(editor_name: impl AsRef<OsStr>) -> PathBuf {
+    match which::which(editor_name.as_ref()) {
+        Ok(path) => path,
+        Err(_) => PathBuf::from(editor_name.as_ref()), // Fallback to just the name but that's weird
     }
 }

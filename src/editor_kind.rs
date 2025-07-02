@@ -1,6 +1,6 @@
 use std::path::Path;
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub(crate) enum EditorKind {
     // CLI
     Vi,

@@ -17,12 +17,12 @@ See the examples for more details.
 ```rust
 use open_editor::editor_call_builder::EditorCallBuilder;
 
-let filename =  "./file.txt";
+let filename = PathBuf::from_str("./file.txt")?;
 
-EditorCallBuilder::new(filename)?
+EditorCallBuilder::new()
     .at_line(5)
     .at_column(42)
-    .call_editor()?;
+    .open_file(&filename)?;
 ```
 
 ### Getting the result as a String
@@ -30,13 +30,13 @@ EditorCallBuilder::new(filename)?
 ```rust
 use open_editor::open_editor;
 
-let content = open_editor()?;
-assert!(!content.is_empty(), "Editor returned empty content");
+let content = EditorCallBuilder::new().open_editor()?;
+assert!(!content.is_empty(), "Nothing was written");
 ```
 
 ### Editing Strings
 
 ```rust
 let template = "Hello, {name}!\nWelcome to {place}.";
-let filled_template = edit_in_editor(template)?;
+let filled_template = EditorCallBuilder::new().edit_string(template)?;
 ```

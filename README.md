@@ -30,13 +30,15 @@ EditorCallBuilder::new()
 ```rust
 use open_editor::open_editor;
 
-let content = EditorCallBuilder::new().open_editor()?;
+let content = open_editor()?;
 assert!(!content.is_empty(), "Nothing was written");
 ```
 
 ### Editing Strings
 
 ```rust
+use open_editor::edit_string;
+
 let template = "Hello, {name}!\nWelcome to {place}.";
-let filled_template = EditorCallBuilder::new().edit_string(template)?;
+let filled_template = edit_string(template)?;
 ```

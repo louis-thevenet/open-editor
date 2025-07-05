@@ -20,7 +20,7 @@ fn get_parameters() -> Result<(PathBuf, usize, usize), Box<dyn std::error::Error
     io::stdout().flush()?;
     let mut file_path = String::new();
     io::stdin().read_line(&mut file_path)?;
-    if file_path.is_empty() {
+    if file_path.trim().is_empty() {
         file_path = "./Cargo.toml".to_string();
     }
     let file_path = PathBuf::from(file_path.trim());

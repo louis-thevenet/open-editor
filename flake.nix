@@ -44,6 +44,15 @@
               pkgs.cargo-edit
             ];
           };
+          editors = with pkgs; [
+            vim-full
+            neovim
+            emacs
+            kakoune
+            nano
+            helix
+            vscodium
+          ];
         in
         {
           # Rust dev environment
@@ -57,7 +66,7 @@
             packages = [
               rust-toolchain
               pkgs.clippy
-            ];
+            ] ++ editors;
           };
 
           # Add your auto-formatters here.

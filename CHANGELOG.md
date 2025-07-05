@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/louis-thevenet/open-editor/compare/v1.0.0...v1.1.0) (2025-07-05)
+
+
+### Features
+
+* add public convenient methods for EditorCallBuilder final methods ([#6](https://github.com/louis-thevenet/open-editor/issues/6)) ([e87f6f8](https://github.com/louis-thevenet/open-editor/commit/e87f6f89d6e5e99945759530ba221dc82b15cf7c))
+
+
+### Bug Fixes
+
+* fix no wait mode for vi, vim, nvim, gvim editors ([314cce5](https://github.com/louis-thevenet/open-editor/commit/314cce55dee077dfc51da40b312bec6bc27c70ae))
+
 ## [1.0.0](https://github.com/louis-thevenet/open-editor/compare/v0.2.0...v1.0.0) (2025-07-02)
 
 

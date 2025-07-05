@@ -59,20 +59,23 @@ impl EditorKind {
             EditorKind::Kakoune => {
                 vec![format!("{}", path), format!("+{}:{}", line, column)]
             }
-            EditorKind::Code => {
-                vec![
-                    if wait {
-                        "-w".to_string()
-                    } else {
-                        String::new()
-                    },
-                    "--goto".to_string(),
-                    format!("{}:{}:{}", path, line, column),
-                ]
-            }
-            EditorKind::Gvim | EditorKind::Vi | EditorKind::Vim | EditorKind::Nvim => {
-                vec![format!("+call cursor({}, {})", line, column), path]
-            }
+            EditorKind::Code => [
+                if wait { vec!["-w".to_string()] } else { vec![] },
+                vec!["--goto".to_string()],
+                vec![format!("{}:{}:{}", path, line, column)],
+            ]
+            .concat(),
+            EditorKind::Gvim | EditorKind::Vi | EditorKind::Vim | EditorKind::Nvim => [
+                vec![format!("+{}", line,)],
+                if wait {
+                    vec![]
+                } else {
+                    vec!["--nofork".to_string()]
+                },
+                vec![path],
+            ]
+            .concat(),
+
             EditorKind::UnknownEditor => vec![path],
         }
     }

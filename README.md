@@ -6,7 +6,7 @@
 
 `open-editor` allows you to open the system default editor to edit files or simply get the result as a String.
 
-It supports calling the editor with specific line and column numbers.
+It also supports calling a specific editor or opening on specific line and column numbers.
 
 ## Quick Start
 
@@ -15,7 +15,7 @@ See the examples for more details.
 ### Writing in a file
 
 ```rust
-use open_editor::editor_call_builder::EditorCallBuilder;
+use open_editor::EditorCallBuilder;
 
 let filename = PathBuf::from_str("./file.txt")?;
 

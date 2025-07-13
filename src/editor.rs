@@ -4,14 +4,32 @@ use crate::{editor_kind::EditorKind, errors::OpenEditorError};
 
 #[derive(Debug, Clone)]
 /// Represents an editor instance with its type and binary path.
-pub(crate) struct Editor {
+pub struct Editor {
     pub(crate) editor_type: EditorKind,
     pub(crate) binary_path: PathBuf,
 }
 
 impl Editor {
+    /// Creates a new `Editor` instance from a binary path. The editor type is set to `UnknownEditor`.
+    #[must_use]
+    pub fn from_bin_path(binary_path: PathBuf) -> Self {
+        Self {
+            editor_type: EditorKind::UnknownEditor,
+            binary_path,
+        }
+    }
+    /// Creates a new `Editor` instance from an editor kind. The binary path is determined using the `which` crate.
+    #[must_use]
+    pub fn from_editor_kind(editor_type: EditorKind) -> Self {
+        let binary_path = Self::get_full_path(editor_type.to_string().into());
+        Self {
+            editor_type,
+            binary_path,
+        }
+    }
     /// Creates a new `Editor` instance with the specified editor type and binary path.
-    pub(crate) fn new(editor_type: EditorKind, binary_path: PathBuf) -> Self {
+    #[must_use]
+    pub fn new(editor_type: EditorKind, binary_path: PathBuf) -> Self {
         Self {
             editor_type,
             binary_path,

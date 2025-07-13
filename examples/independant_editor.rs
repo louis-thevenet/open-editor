@@ -1,6 +1,6 @@
 use std::{fs, path::PathBuf, str::FromStr, thread::sleep, time::Duration};
 
-use open_editor::editor_call_builder::EditorCallBuilder;
+use open_editor::EditorCallBuilder;
 
 /// This example is not very practical with TUI editors but it shows how to
 /// spawn an editor and do other stuff.

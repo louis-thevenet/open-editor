@@ -1,11 +1,13 @@
-mod editor;
+pub mod editor;
 pub mod editor_call_builder;
-mod editor_kind;
+pub mod editor_kind;
 pub mod errors;
 
 use std::path::Path;
 
+pub use editor::Editor;
 pub use editor_call_builder::EditorCallBuilder;
+pub use editor_kind::EditorKind;
 
 use crate::errors::OpenEditorError;
 

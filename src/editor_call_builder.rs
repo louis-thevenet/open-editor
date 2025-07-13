@@ -74,6 +74,14 @@ impl EditorCallBuilder {
             ..self
         }
     }
+    /// Sets a specific editor to use instead of the default one.
+    #[must_use]
+    pub fn with_editor(self, editor: Editor) -> Self {
+        Self {
+            editor: Some(editor),
+            ..self
+        }
+    }
     /// Open the default editor and returns what was written in it.
     ///
     /// # Errors

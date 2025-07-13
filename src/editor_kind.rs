@@ -1,7 +1,7 @@
-use std::path::Path;
+use std::{fmt::Display, path::Path};
 
 #[derive(Default, Debug, Clone)]
-pub(crate) enum EditorKind {
+pub enum EditorKind {
     // CLI
     Vi,
     Vim,
@@ -77,6 +77,23 @@ impl EditorKind {
             .concat(),
 
             EditorKind::UnknownEditor => vec![path],
+        }
+    }
+}
+impl Display for EditorKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            EditorKind::Vi => write!(f, "vi"),
+            EditorKind::Vim => write!(f, "vim"),
+            EditorKind::Nvim => write!(f, "nvim"),
+            EditorKind::Emacs => write!(f, "emacs"),
+            EditorKind::Nano => write!(f, "nano"),
+            EditorKind::Pico => write!(f, "pico"),
+            EditorKind::Helix => write!(f, "hx"),
+            EditorKind::Kakoune => write!(f, "kak"),
+            EditorKind::Code => write!(f, "code"),
+            EditorKind::Gvim => write!(f, "gvim"),
+            EditorKind::UnknownEditor => Err(std::fmt::Error),
         }
     }
 }

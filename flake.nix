@@ -29,7 +29,7 @@
           pkgs = import inputs.nixpkgs {
             inherit system overlays;
           };
-          rustToolchain = pkgs.rust-bin.stable."1.87.0".default;
+          rustToolchain = pkgs.rust-bin.stable."1.95.0".default;
 
           rust-toolchain = pkgs.symlinkJoin {
             name = "rust-toolchain";
@@ -66,7 +66,8 @@
             packages = [
               rust-toolchain
               pkgs.clippy
-            ] ++ editors;
+            ]
+            ++ editors;
           };
 
           # Add your auto-formatters here.

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/louis-thevenet/open-editor/compare/v1.1.0...v1.2.0) (2026-05-28)
+
+
+### Features
+
+* add column support for gvim, vi, vim and nvim ([ad591c2](https://github.com/louis-thevenet/open-editor/commit/ad591c29998f827665b0fc60a3b0c0d6136f2b2d))
+
 ## [1.1.0](https://github.com/louis-thevenet/open-editor/compare/v1.0.0...v1.1.0) (2025-07-13)
 
 

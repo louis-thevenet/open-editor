@@ -66,7 +66,7 @@ impl EditorKind {
             ]
             .concat(),
             EditorKind::Gvim | EditorKind::Vi | EditorKind::Vim | EditorKind::Nvim => [
-                vec![format!("+{}", line,)],
+                vec![format!("+call cursor({},{})", line, column)],
                 if wait {
                     vec![]
                 } else {

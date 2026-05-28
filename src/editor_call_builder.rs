@@ -161,7 +161,7 @@ impl EditorCallBuilder {
                 (v.into_string().ok(), path)
             })
             .filter_map(|(v, path)| v.map(|v| (v, path)))
-            .map(|(v, cmd)| (Editor::new(EditorKind::from(v), cmd)))
+            .map(|(v, cmd)| Editor::new(EditorKind::from(v), cmd))
             .next()
             .ok_or(OpenEditorError::NoEditorFound)
     }

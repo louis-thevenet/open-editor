@@ -14,6 +14,10 @@ pub enum EditorKind {
     // GUI
     Code,
     Gvim,
+    // Windows
+    Notepad,
+    NotePadPlusPlus,
+    SublimeText,
     #[default]
     UnknownEditor,
 }
@@ -32,6 +36,9 @@ impl From<String> for EditorKind {
             "kak" => EditorKind::Kakoune,
             "code" | "vscode" => EditorKind::Code,
             "gvim" => EditorKind::Gvim,
+            "notepad" | "notepad.exe" => EditorKind::Notepad,
+            "notepad++" | "notepad++.exe" | "notepadplusplus" => EditorKind::NotePadPlusPlus,
+            "subl" | "sublime" | "sublime_text" | "sublime_text.exe" => EditorKind::SublimeText,
             _ => EditorKind::UnknownEditor,
         }
     }
@@ -75,7 +82,18 @@ impl EditorKind {
                 vec![path],
             ]
             .concat(),
-
+            EditorKind::Notepad => {
+                // Notepad doesn't support line/column arguments
+                vec![path]
+            }
+            EditorKind::NotePadPlusPlus => {
+                // Notepad++ supports -n for line number
+                vec![format!("-n{}", line), path]
+            }
+            EditorKind::SublimeText => {
+                // Sublime Text supports :line:column syntax
+                vec![format!("{}:{}:{}", path, line, column)]
+            }
             EditorKind::UnknownEditor => vec![path],
         }
     }
@@ -93,6 +111,9 @@ impl Display for EditorKind {
             EditorKind::Kakoune => write!(f, "kak"),
             EditorKind::Code => write!(f, "code"),
             EditorKind::Gvim => write!(f, "gvim"),
+            EditorKind::Notepad => write!(f, "notepad"),
+            EditorKind::NotePadPlusPlus => write!(f, "notepad++"),
+            EditorKind::SublimeText => write!(f, "sublime"),
             EditorKind::UnknownEditor => Err(std::fmt::Error),
         }
     }

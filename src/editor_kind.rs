@@ -14,6 +14,7 @@ pub enum EditorKind {
     // GUI
     Code,
     Gvim,
+    Zed,
     #[default]
     UnknownEditor,
 }
@@ -31,6 +32,7 @@ impl From<String> for EditorKind {
             "hx" => EditorKind::Helix,
             "kak" => EditorKind::Kakoune,
             "code" | "vscode" => EditorKind::Code,
+            "zed" | "zeditor" => EditorKind::Zed,
             "gvim" => EditorKind::Gvim,
             _ => EditorKind::UnknownEditor,
         }
@@ -75,6 +77,11 @@ impl EditorKind {
                 vec![path],
             ]
             .concat(),
+            EditorKind::Zed => [
+                if wait { vec!["-w".to_string()] } else { vec![] },
+                vec![format!("{}:{}:{}", path, line, column)],
+            ]
+            .concat(),
 
             EditorKind::UnknownEditor => vec![path],
         }
@@ -92,6 +99,7 @@ impl Display for EditorKind {
             EditorKind::Helix => write!(f, "hx"),
             EditorKind::Kakoune => write!(f, "kak"),
             EditorKind::Code => write!(f, "code"),
+            EditorKind::Zed => write!(f, "zed"),
             EditorKind::Gvim => write!(f, "gvim"),
             EditorKind::UnknownEditor => Err(std::fmt::Error),
         }

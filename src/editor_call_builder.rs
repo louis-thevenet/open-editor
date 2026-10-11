@@ -150,18 +150,42 @@ impl EditorCallBuilder {
     }
     /// Gets the default editor from the environment variables `VISUAL` or `EDITOR`.
     fn get_default_editor(&self) -> Result<Editor, OpenEditorError> {
-        self.custom_env_vars
+        let env_var_values = self
+            .custom_env_vars
             .clone()
             .into_iter()
             .chain(ENV_VARS.iter().map(|&s| s.to_string()))
-            .filter_map(env::var_os)
-            .filter(|var| !var.is_empty())
+            .filter_map(env::var_os) // keep defined vars
+            .filter(|var| !var.is_empty()) // skip empty vars
             .map(|v| {
-                let path = Editor::get_full_path(v.clone());
-                (v.into_string().ok(), path)
+                let value = v.to_string_lossy().into_owned();
+                let mut split_whitespace = value.split_whitespace();
+
+                let first_value_opt = split_whitespace.next();
+                let args: Vec<String> = split_whitespace.map(str::to_owned).collect();
+
+                match first_value_opt {
+                    Some(first_value) => {
+                        let path = PathBuf::from(first_value);
+
+                        if path.exists() {
+                            Ok((path, args))
+                        } else {
+                            Ok((Editor::get_full_path(first_value), args))
+                        }
+                    }
+                    None => Err(OpenEditorError::NoEditorFound),
+                }
             })
-            .filter_map(|(v, path)| v.map(|v| (v, path)))
-            .map(|(v, cmd)| Editor::new(EditorKind::from(v), cmd))
+            .filter_map(Result::ok);
+
+        env_var_values
+            .map(|(path, args)| {
+                let name = path.file_name().unwrap().to_string_lossy().into_owned();
+                let args = args.join(" ");
+                let cmd = format!("{} {args}", path.display());
+                Editor::new(EditorKind::from(name), cmd.into())
+            })
             .next()
             .ok_or(OpenEditorError::NoEditorFound)
     }

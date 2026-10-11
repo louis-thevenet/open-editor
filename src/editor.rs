@@ -21,7 +21,7 @@ impl Editor {
     /// Creates a new `Editor` instance from an editor kind. The binary path is determined using the `which` crate.
     #[must_use]
     pub fn from_editor_kind(editor_type: EditorKind) -> Self {
-        let binary_path = Self::get_full_path(editor_type.to_string().into());
+        let binary_path = Self::get_full_path(&editor_type.to_string());
         Self {
             editor_type,
             binary_path,
@@ -36,7 +36,7 @@ impl Editor {
         }
     }
     /// Gets the full path of the editor binary based on the provided editor name.
-    pub(crate) fn get_full_path(editor_name: OsString) -> PathBuf {
+    pub(crate) fn get_full_path(editor_name: &str) -> PathBuf {
         match which::which(editor_name.clone()) {
             Ok(path) => path,
             Err(_) => PathBuf::from(editor_name), // Fallback to just the name but that's weird
